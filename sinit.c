@@ -38,6 +38,7 @@ main(void)
 
 	if (getpid() != 1)
 		return EXIT_FAILURE;
+	setsid();
 
 	sigfillset(&set);
 	sigprocmask(SIG_BLOCK, &set, 0);
