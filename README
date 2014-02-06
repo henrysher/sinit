@@ -1,0 +1,24 @@
+sinit - suckless init
+=====================
+
+sinit is a simple init.  It was initially based on
+Strake's init.c[1].
+
+Why?
+----
+
+I wanted to get rid of Busybox init on my toy distro[2].
+
+How?
+----
+
+sinit exposes a set of operations via a FIFO.  Normally
+this FIFO resides at '/var/run/sinit.fifo'.  There are two
+commands currently supported, 'reboot' and 'poweroff'.
+
+To see how sinit integrates with the init scripts, then have
+a look at [3].
+
+[1] https://github.com/strake/init
+[2] http://git.2f30.org/morpheus/
+[3] http://git.2f30.org/fs/
