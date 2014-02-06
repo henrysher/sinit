@@ -53,7 +53,7 @@ main(void)
 
 	sigprocmask(SIG_UNBLOCK, &set, 0);
 
-	spawn("/bin/rc", (char *[]){ "rc", NULL });
+	spawn("/bin/rc.init", (char *[]){ "rc.init", NULL });
 
 	unlink(fifopath);
 	umask(0);
