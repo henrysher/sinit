@@ -111,6 +111,7 @@ spawn(const Arg *arg)
 		setsid();
 		setpgid(0, 0);
 		execvp(p, arg->v);
+		weprintf("sinit: execvp %s:", p);
 		_exit(errno == ENOENT ? 127 : 126);
 	}
 }
