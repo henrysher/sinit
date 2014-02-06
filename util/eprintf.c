@@ -6,8 +6,6 @@
 
 #include "../util.h"
 
-char *argv0;
-
 static void venprintf(int, const char *, va_list);
 
 void
@@ -33,8 +31,6 @@ enprintf(int status, const char *fmt, ...)
 void
 venprintf(int status, const char *fmt, va_list ap)
 {
-	fprintf(stderr, "%s: ", argv0);
-
 	vfprintf(stderr, fmt, ap);
 
 	if(fmt[0] && fmt[strlen(fmt)-1] == ':') {
@@ -43,4 +39,18 @@ venprintf(int status, const char *fmt, va_list ap)
 	}
 
 	exit(status);
+}
+
+void
+weprintf(const char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	vfprintf(stderr, fmt, ap);
+	va_end(ap);
+	if (fmt[0] && fmt[strlen(fmt)-1] == ':') {
+		fputc(' ', stderr);
+		perror(NULL);
+	}
 }

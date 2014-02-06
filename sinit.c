@@ -58,19 +58,21 @@ main(void)
 	unlink(fifopath);
 	umask(0);
 	if (mkfifo(fifopath, 0600) < 0)
-		eprintf("mkfifo %s:");
+		weprintf("sinit: mkfifo %s:");
 
 	fd = open(fifopath, O_RDWR | O_NONBLOCK);
 	if (fd < 0)
-		eprintf("open %s:", fifopath);
-	while (1) {
-		FD_ZERO(&rfds);
-		FD_SET(fd, &rfds);
-		n = select(fd + 1, &rfds, NULL, NULL, NULL);
-		if (n < 0)
-			eprintf("select:");
-		if (FD_ISSET(fd, &rfds))
-			dispatchcmd(fd);
+		weprintf("sinit: open %s:", fifopath);
+	if (fd >= 0) {
+		while (1) {
+			FD_ZERO(&rfds);
+			FD_SET(fd, &rfds);
+			n = select(fd + 1, &rfds, NULL, NULL, NULL);
+			if (n < 0)
+				eprintf("sinit: select:");
+			if (FD_ISSET(fd, &rfds))
+				dispatchcmd(fd);
+		}
 	}
 
 	return EXIT_SUCCESS;
@@ -97,9 +99,7 @@ dispatchcmd(int fd)
 
 	n = read(fd, buf, sizeof(buf) - 1);
 	if (n < 0)
-		eprintf("read:");
-	if (n == 0)
-		return;
+		weprintf("sinit: read:");
 	buf[n] = '\0';
 	p = strchr(buf, '\n');
 	if (p)
@@ -119,7 +119,7 @@ spawn(const char *file, char *const argv[])
 
 	pid = fork();
 	if (pid < 0)
-		eprintf("fork:");
+		weprintf("sinit: fork:");
 	if (pid == 0) {
 		setsid();
 		setpgid(0, 0);
