@@ -1,6 +1,5 @@
 /* See LICENSE file for copyright and license details. */
 
-#include <err.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
