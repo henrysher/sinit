@@ -102,7 +102,7 @@ static void
 spawn(const Arg *arg)
 {
 	pid_t pid;
-	const char *p = arg->v;
+	char *const *p = arg->v;
 
 	pid = fork();
 	if (pid < 0)
@@ -110,7 +110,7 @@ spawn(const Arg *arg)
 	if (pid == 0) {
 		setsid();
 		setpgid(0, 0);
-		execvp(p, arg->v);
+		execvp(*p, p);
 		weprintf("sinit: execvp %s:", p);
 		_exit(errno == ENOENT ? 127 : 126);
 	}
