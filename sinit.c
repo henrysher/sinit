@@ -1,4 +1,5 @@
 /* See LICENSE file for copyright and license details. */
+
 #include <err.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -23,10 +24,8 @@ typedef struct {
         const Arg arg;
 } Command;
 
-static void cmdpoweroff(const Arg *);
-static void cmdreboot(const Arg *);
 static void dispatchcmd(int);
-static void spawn(const char *, char *const []);
+static void spawn(const Arg *);
 
 #include "config.h"
 
@@ -53,7 +52,7 @@ main(void)
 
 	sigprocmask(SIG_UNBLOCK, &set, 0);
 
-	spawn("/bin/rc.init", (char *[]){ "rc.init", NULL });
+	spawn(&rcinitarg);
 
 	unlink(fifopath);
 	umask(0);
@@ -79,18 +78,6 @@ main(void)
 }
 
 static void
-cmdpoweroff(const Arg *arg)
-{
-	spawn("/bin/rc.shutdown", (char *[]) { "rc", "poweroff", NULL });
-}
-
-static void
-cmdreboot(const Arg *arg)
-{
-	spawn("/bin/rc.shutdown", (char *[]) { "rc", "reboot", NULL });
-}
-
-static void
 dispatchcmd(int fd)
 {
 	int i;
@@ -113,9 +100,10 @@ dispatchcmd(int fd)
 }
 
 static void
-spawn(const char *file, char *const argv[])
+spawn(const Arg *arg)
 {
 	pid_t pid;
+	const char *p = arg->v;
 
 	pid = fork();
 	if (pid < 0)
@@ -123,7 +111,7 @@ spawn(const char *file, char *const argv[])
 	if (pid == 0) {
 		setsid();
 		setpgid(0, 0);
-		execvp(file, argv);
+		execvp(p, arg->v);
 		_exit(errno == ENOENT ? 127 : 126);
 	}
 }
