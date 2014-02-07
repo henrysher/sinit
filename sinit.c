@@ -18,8 +18,6 @@ typedef union {
         const void *v;
 } Arg;
 
-volatile sig_atomic_t signum;
-
 typedef struct {
 	int sig;
 	void (*func)(void);
