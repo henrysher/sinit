@@ -57,7 +57,7 @@ main(void)
 	unlink(fifopath);
 	umask(0);
 	if (mkfifo(fifopath, 0600) < 0)
-		weprintf("sinit: mkfifo %s:");
+		weprintf("sinit: mkfifo %s:", fifopath);
 
 	fd = open(fifopath, O_RDWR | O_NONBLOCK);
 	if (fd < 0)
