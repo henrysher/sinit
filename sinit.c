@@ -113,7 +113,6 @@ sigreboot(void)
 static void
 spawn(const Arg *arg)
 {
-	int status;
 	pid_t pid;
 	char *const *p = arg->v;
 
@@ -121,16 +120,10 @@ spawn(const Arg *arg)
 	if (pid < 0) {
 		weprintf("sinit: fork:");
 	} else if (pid == 0) {
-		pid = fork();
-		if (pid < 0)
-			weprintf("sinit: fork:");
-		else if (pid > 0)
-			exit(0);
 		setsid();
 		setpgid(0, 0);
 		execvp(*p, p);
 		weprintf("sinit: execvp %s:", p);
 		_exit(errno == ENOENT ? 127 : 126);
 	}
-	waitpid(pid, &status, 0);
 }
