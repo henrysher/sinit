@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/select.h>
+#include <sys/signalfd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -23,57 +24,78 @@ typedef struct {
         const Arg arg;
 } Command;
 
+volatile sig_atomic_t signum;
+
+typedef struct {
+	int sig;
+	void (*func)(void);
+} Sigmap;
+
 static void dispatchcmd(int);
+static void sigfifo(void);
+static void sigreap(void);
+static void sigreboot(void);
 static void spawn(const Arg *);
+
+static Sigmap dispatchsig[] = {
+	{ SIGHUP,  sigfifo   },
+	{ SIGCHLD, sigreap   },
+	{ SIGINT,  sigreboot },
+};
+
+static int sigfd = -1;
+static int fifofd = -1;
 
 #include "config.h"
 
 int
 main(void)
 {
-	sigset_t set;
-	pid_t pid;
+	struct signalfd_siginfo siginfo;
+	sigset_t sigset;
+	int maxfd, i, ret;
+	ssize_t n;
 	fd_set rfds;
-	int status, fd, n;
 
 	if (getpid() != 1)
 		return EXIT_FAILURE;
 	setsid();
 
-	sigfillset(&set);
-	sigprocmask(SIG_BLOCK, &set, 0);
+	sigemptyset(&sigset);
+	for (i = 0; i < LEN(dispatchsig); i++)
+		sigaddset(&sigset, dispatchsig[i].sig);
+	sigprocmask(SIG_BLOCK, &sigset, NULL);
 
-	pid = fork();
-	if (pid < 0)
-		return EXIT_FAILURE;
-	if (pid > 0)
-		for (;;)
-			wait(&status);
+	sigfd = signalfd(-1, &sigset, 0);
+	if (sigfd < 0)
+		eprintf("sinit: signalfd:");
 
-	sigprocmask(SIG_UNBLOCK, &set, 0);
+	spawn(&(Arg){ .v = rcinitcmd });
 
-	spawn(&rcinitarg);
-
-	if (!fifopath)
-		return EXIT_SUCCESS;
-
-	unlink(fifopath);
-	umask(0);
-	if (mkfifo(fifopath, 0600) < 0)
-		weprintf("sinit: mkfifo %s:", fifopath);
-
-	fd = open(fifopath, O_RDWR | O_NONBLOCK);
-	if (fd < 0)
-		weprintf("sinit: open %s:", fifopath);
-	if (fd >= 0) {
-		while (1) {
-			FD_ZERO(&rfds);
-			FD_SET(fd, &rfds);
-			n = select(fd + 1, &rfds, NULL, NULL, NULL);
-			if (n < 0)
-				eprintf("sinit: select:");
-			if (FD_ISSET(fd, &rfds))
-				dispatchcmd(fd);
+	while (1) {
+		FD_ZERO(&rfds);
+		FD_SET(sigfd, &rfds);
+		maxfd = sigfd;
+		if (fifofd != -1) {
+			FD_SET(fifofd, &rfds);
+			if (fifofd > maxfd)
+				maxfd = fifofd;
+		}
+		ret = select(maxfd + 1, &rfds, NULL, NULL, NULL);
+		if (ret < 0)
+			eprintf("sinit: select:");
+		if (ret > 0) {
+			if (FD_ISSET(sigfd, &rfds)) {
+				n = read(sigfd, &siginfo, sizeof(siginfo));
+				if (n <= 0)
+					continue;
+				for (i = 0; i < LEN(dispatchsig); i++)
+					if (dispatchsig[i].sig == siginfo.ssi_signo)
+						dispatchsig[i].func();
+			}
+			if (fifofd != -1)
+				if (FD_ISSET(fifofd, &rfds))
+					dispatchcmd(fifofd);
 		}
 	}
 
@@ -100,6 +122,33 @@ dispatchcmd(int fd)
 			break;
 		}
 	}
+}
+
+static void
+sigfifo(void)
+{
+	if (!fifopath)
+		return;
+	unlink(fifopath);
+	umask(0);
+	if (mkfifo(fifopath, 0600) < 0)
+		weprintf("sinit: mkfifo %s:", fifopath);
+	fifofd = open(fifopath, O_RDWR | O_NONBLOCK);
+	if (fifofd < 0)
+		weprintf("sinit: open %s:", fifopath);
+}
+
+static void
+sigreap(void)
+{
+	while (waitpid(-1, NULL, WNOHANG) > 0)
+		;
+}
+
+static void
+sigreboot(void)
+{
+	spawn(&(Arg){ .v = rcrebootcmd });
 }
 
 static void
