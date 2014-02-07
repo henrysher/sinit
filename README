@@ -12,9 +12,11 @@ I wanted to get rid of Busybox init on my toy distro[2].
 How?
 ----
 
-sinit exposes a set of operations via a FIFO.  Normally
-this FIFO resides at '/var/run/sinit.fifo'.  There are two
-commands currently supported, 'reboot' and 'poweroff'.
+There are 3 signals that sinit will act on.
+
+      SIGUSR1: powers off the machine.
+      SIGINT:  reboots the machine (or alternatively via ctrl-alt-del).
+      SIGCHLD: reap children
 
 To see how sinit integrates with the init scripts, then have
 a look at [3].
