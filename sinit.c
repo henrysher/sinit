@@ -54,10 +54,13 @@ main(void)
 		return EXIT_FAILURE;
 	setsid();
 
-	sigemptyset(&sigset);
+	if (sigemptyset(&sigset) < 0)
+		eprintf("sinit: sigemptyset:");
 	for (i = 0; i < LEN(dispatchsig); i++)
-		sigaddset(&sigset, dispatchsig[i].sig);
-	sigprocmask(SIG_BLOCK, &sigset, NULL);
+		if (sigaddset(&sigset, dispatchsig[i].sig) < 0)
+			eprintf("sinit: sigaddset:");
+	if (sigprocmask(SIG_BLOCK, &sigset, NULL) < 0)
+		eprintf("sinit: sigprocmask:");
 
 	sigfd = signalfd(-1, &sigset, 0);
 	if (sigfd < 0)
@@ -74,8 +77,8 @@ main(void)
 		if (ret > 0) {
 			if (FD_ISSET(sigfd, &rfds)) {
 				n = read(sigfd, &siginfo, sizeof(siginfo));
-				if (n <= 0)
-					continue;
+				if (n < 0)
+					eprintf("sinit: read:");
 				for (i = 0; i < LEN(dispatchsig); i++)
 					if (dispatchsig[i].sig == siginfo.ssi_signo)
 						dispatchsig[i].func();
