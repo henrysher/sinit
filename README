@@ -2,7 +2,7 @@ sinit - suckless init
 =====================
 
 sinit is a simple init.  It was initially based on
-Strake's init.c[1].
+Rich Felker's minimal init[1].
 
 Why?
 ----
@@ -21,6 +21,6 @@ There are 3 signals that sinit will act on.
 To see how sinit integrates with the init scripts, then have
 a look at [3].
 
-[1] https://github.com/strake/init
+[1] https://gist.github.com/rofl0r/6168719
 [2] http://git.2f30.org/morpheus/
 [3] http://git.2f30.org/fs/
