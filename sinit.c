@@ -54,6 +54,9 @@ main(void)
 
 	spawn(&rcinitarg);
 
+	if (!fifopath)
+		return EXIT_SUCCESS;
+
 	unlink(fifopath);
 	umask(0);
 	if (mkfifo(fifopath, 0600) < 0)
