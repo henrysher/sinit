@@ -79,6 +79,8 @@ main(void)
 				n = read(sigfd, &siginfo, sizeof(siginfo));
 				if (n < 0)
 					eprintf("sinit: read:");
+				if (n != sizeof(siginfo))
+					continue;
 				for (i = 0; i < LEN(dispatchsig); i++)
 					if (dispatchsig[i].sig == siginfo.ssi_signo)
 						dispatchsig[i].func();
