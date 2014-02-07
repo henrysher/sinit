@@ -56,9 +56,11 @@ main(void)
 
 	if (sigemptyset(&sigset) < 0)
 		eprintf("sinit: sigemptyset:");
+
 	for (i = 0; i < LEN(dispatchsig); i++)
 		if (sigaddset(&sigset, dispatchsig[i].sig) < 0)
 			eprintf("sinit: sigaddset:");
+
 	if (sigprocmask(SIG_BLOCK, &sigset, NULL) < 0)
 		eprintf("sinit: sigprocmask:");
 
@@ -74,17 +76,17 @@ main(void)
 		ret = select(sigfd + 1, &rfds, NULL, NULL, NULL);
 		if (ret < 0)
 			eprintf("sinit: select:");
-		if (ret > 0) {
-			if (FD_ISSET(sigfd, &rfds)) {
-				n = read(sigfd, &siginfo, sizeof(siginfo));
-				if (n < 0)
-					eprintf("sinit: read:");
-				if (n != sizeof(siginfo))
-					continue;
-				for (i = 0; i < LEN(dispatchsig); i++)
-					if (dispatchsig[i].sig == siginfo.ssi_signo)
-						dispatchsig[i].func();
-			}
+		if (ret == 0)
+			continue;
+		if (FD_ISSET(sigfd, &rfds)) {
+			n = read(sigfd, &siginfo, sizeof(siginfo));
+			if (n < 0)
+				eprintf("sinit: read:");
+			if (n != sizeof(siginfo))
+				continue;
+			for (i = 0; i < LEN(dispatchsig); i++)
+				if (dispatchsig[i].sig == siginfo.ssi_signo)
+					dispatchsig[i].func();
 		}
 	}
 
