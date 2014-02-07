@@ -34,8 +34,6 @@ static Sigmap dispatchsig[] = {
 	{ SIGINT,  sigreboot   },
 };
 
-static int sigfd = -1;
-
 #include "config.h"
 
 int
@@ -43,6 +41,7 @@ main(void)
 {
 	struct signalfd_siginfo siginfo;
 	sigset_t sigset;
+	int sigfd;
 	int i;
 	int ret;
 	ssize_t n;
