@@ -64,7 +64,7 @@ main(void)
 	if (sigprocmask(SIG_BLOCK, &sigset, NULL) < 0)
 		eprintf("sinit: sigprocmask:");
 
-	sigfd = signalfd(-1, &sigset, 0);
+	sigfd = signalfd(-1, &sigset, SFD_CLOEXEC);
 	if (sigfd < 0)
 		eprintf("sinit: signalfd:");
 
