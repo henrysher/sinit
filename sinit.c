@@ -25,13 +25,15 @@ typedef struct {
 	void (*func)(void);
 } Sigmap;
 
+static void sigpoweroff(void);
 static void sigreap(void);
 static void sigreboot(void);
 static void spawn(const Arg *);
 
 static Sigmap dispatchsig[] = {
-	{ SIGCHLD, sigreap   },
-	{ SIGINT,  sigreboot },
+	{ SIGUSR1, sigpoweroff },
+	{ SIGCHLD, sigreap     },
+	{ SIGINT,  sigreboot   },
 };
 
 static int sigfd = -1;
@@ -82,6 +84,12 @@ main(void)
 	}
 
 	return EXIT_SUCCESS;
+}
+
+static void
+sigpoweroff(void)
+{
+	spawn(&(Arg){ .v = rcpoweroffcmd });
 }
 
 static void
