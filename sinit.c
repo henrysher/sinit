@@ -34,7 +34,7 @@ main(void)
 	sigset_t set;
 	pid_t pid;
 	fd_set rfds;
-	int c, fd, n;
+	int status, fd, n;
 
 	if (getpid() != 1)
 		return EXIT_FAILURE;
@@ -48,7 +48,7 @@ main(void)
 		return EXIT_FAILURE;
 	if (pid > 0)
 		for (;;)
-			wait(&c);
+			wait(&status);
 
 	sigprocmask(SIG_UNBLOCK, &set, 0);
 
@@ -102,17 +102,24 @@ dispatchcmd(int fd)
 static void
 spawn(const Arg *arg)
 {
+	int status;
 	pid_t pid;
 	char *const *p = arg->v;
 
 	pid = fork();
-	if (pid < 0)
+	if (pid < 0) {
 		weprintf("sinit: fork:");
-	if (pid == 0) {
+	} else if (pid == 0) {
+		pid = fork();
+		if (pid < 0)
+			weprintf("sinit: fork:");
+		else if (pid > 0)
+			exit(0);
 		setsid();
 		setpgid(0, 0);
 		execvp(*p, p);
 		weprintf("sinit: execvp %s:", p);
 		_exit(errno == ENOENT ? 127 : 126);
 	}
+	waitpid(pid, &status, 0);
 }
