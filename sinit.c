@@ -129,6 +129,8 @@ sigfifo(void)
 {
 	if (!fifopath)
 		return;
+	if (fifofd != -1)
+		close(fifofd);
 	unlink(fifopath);
 	umask(0);
 	if (mkfifo(fifopath, 0600) < 0)
