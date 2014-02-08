@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/select.h>
 #include <sys/signalfd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -39,9 +38,7 @@ main(void)
 	sigset_t sigset;
 	int sigfd;
 	int i;
-	int ret;
 	ssize_t n;
-	fd_set rfds;
 
 	if (getpid() != 1)
 		return EXIT_FAILURE;
@@ -64,23 +61,14 @@ main(void)
 	spawn(rcinitcmd);
 
 	while (1) {
-		FD_ZERO(&rfds);
-		FD_SET(sigfd, &rfds);
-		ret = select(sigfd + 1, &rfds, NULL, NULL, NULL);
-		if (ret < 0)
-			eprintf("sinit: select:");
-		if (ret == 0)
+		n = read(sigfd, &siginfo, sizeof(siginfo));
+		if (n < 0)
+			eprintf("sinit: read:");
+		if (n != sizeof(siginfo))
 			continue;
-		if (FD_ISSET(sigfd, &rfds)) {
-			n = read(sigfd, &siginfo, sizeof(siginfo));
-			if (n < 0)
-				eprintf("sinit: read:");
-			if (n != sizeof(siginfo))
-				continue;
-			for (i = 0; i < LEN(dispatchsig); i++)
-				if (dispatchsig[i].sig == siginfo.ssi_signo)
-					dispatchsig[i].func();
-		}
+		for (i = 0; i < LEN(dispatchsig); i++)
+			if (dispatchsig[i].sig == siginfo.ssi_signo)
+				dispatchsig[i].func();
 	}
 
 	return EXIT_SUCCESS;
