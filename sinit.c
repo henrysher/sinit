@@ -14,10 +14,6 @@
 #include <unistd.h>
 #include "util.h"
 
-typedef union {
-        const void *v;
-} Arg;
-
 typedef struct {
 	int sig;
 	void (*func)(void);
@@ -26,7 +22,7 @@ typedef struct {
 static void sigpoweroff(void);
 static void sigreap(void);
 static void sigreboot(void);
-static void spawn(const Arg *);
+static void spawn(char *const []);
 
 static Sigmap dispatchsig[] = {
 	{ SIGUSR1, sigpoweroff },
@@ -65,7 +61,7 @@ main(void)
 	if (sigfd < 0)
 		eprintf("sinit: signalfd:");
 
-	spawn(&(Arg){ .v = rcinitcmd });
+	spawn(rcinitcmd);
 
 	while (1) {
 		FD_ZERO(&rfds);
@@ -93,7 +89,7 @@ main(void)
 static void
 sigpoweroff(void)
 {
-	spawn(&(Arg){ .v = rcpoweroffcmd });
+	spawn(rcpoweroffcmd);
 }
 
 static void
@@ -106,14 +102,13 @@ sigreap(void)
 static void
 sigreboot(void)
 {
-	spawn(&(Arg){ .v = rcrebootcmd });
+	spawn(rcrebootcmd);
 }
 
 static void
-spawn(const Arg *arg)
+spawn(char *const argv[])
 {
 	pid_t pid;
-	char *const *p = arg->v;
 
 	pid = fork();
 	if (pid < 0) {
@@ -121,8 +116,8 @@ spawn(const Arg *arg)
 	} else if (pid == 0) {
 		setsid();
 		setpgid(0, 0);
-		execvp(*p, p);
-		weprintf("sinit: execvp %s:", *p);
+		execvp(argv[0], argv);
+		weprintf("sinit: execvp %s:", argv[0]);
 		_exit(errno == ENOENT ? 127 : 126);
 	}
 }
