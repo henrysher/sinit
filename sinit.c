@@ -68,6 +68,7 @@ main(void)
 				dispatchsig[i].func();
 	}
 
+	/* not reachable */
 	return EXIT_SUCCESS;
 }
 
