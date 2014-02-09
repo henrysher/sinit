@@ -31,9 +31,9 @@ static Sigmap dispatchsig[] = {
 int
 main(void)
 {
-	struct signalfd_siginfo siginfo;
-	sigset_t sigset;
-	int sigfd;
+	struct signalfd_siginfo si;
+	sigset_t set;
+	int fd;
 	int i;
 	ssize_t n;
 
@@ -41,30 +41,30 @@ main(void)
 		return EXIT_FAILURE;
 	setsid();
 
-	if (sigemptyset(&sigset) < 0)
+	if (sigemptyset(&set) < 0)
 		eprintf("sinit: sigemptyset:");
 
 	for (i = 0; i < LEN(dispatchsig); i++)
-		if (sigaddset(&sigset, dispatchsig[i].sig) < 0)
+		if (sigaddset(&set, dispatchsig[i].sig) < 0)
 			eprintf("sinit: sigaddset:");
 
-	if (sigprocmask(SIG_BLOCK, &sigset, NULL) < 0)
+	if (sigprocmask(SIG_BLOCK, &set, NULL) < 0)
 		eprintf("sinit: sigprocmask:");
 
-	sigfd = signalfd(-1, &sigset, SFD_CLOEXEC);
-	if (sigfd < 0)
+	fd = signalfd(-1, &set, SFD_CLOEXEC);
+	if (fd < 0)
 		eprintf("sinit: signalfd:");
 
 	spawn(rcinitcmd);
 
 	while (1) {
-		n = read(sigfd, &siginfo, sizeof(siginfo));
+		n = read(fd, &si, sizeof(si));
 		if (n < 0)
 			eprintf("sinit: read:");
-		if (n != sizeof(siginfo))
+		if (n != sizeof(si))
 			continue;
 		for (i = 0; i < LEN(dispatchsig); i++)
-			if (dispatchsig[i].sig == siginfo.ssi_signo)
+			if (dispatchsig[i].sig == si.ssi_signo)
 				dispatchsig[i].func();
 	}
 
