@@ -41,15 +41,10 @@ main(void)
 		return EXIT_FAILURE;
 	setsid();
 
-	if (sigemptyset(&set) < 0)
-		eprintf("sinit: sigemptyset:");
-
+	sigemptyset(&set);
 	for (i = 0; i < LEN(dispatchsig); i++)
-		if (sigaddset(&set, dispatchsig[i].sig) < 0)
-			eprintf("sinit: sigaddset:");
-
-	if (sigprocmask(SIG_BLOCK, &set, NULL) < 0)
-		eprintf("sinit: sigprocmask:");
+		sigaddset(&set, dispatchsig[i].sig);
+	sigprocmask(SIG_BLOCK, &set, NULL);
 
 	fd = signalfd(-1, &set, SFD_CLOEXEC);
 	if (fd < 0)
