@@ -1,5 +1,5 @@
 # sinit version
-VERSION = 0.5
+VERSION = 0.6
 
 # paths
 PREFIX = /usr/local
