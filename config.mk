@@ -8,5 +8,5 @@ MANPREFIX = $(PREFIX)/man
 CC = cc
 LD = $(CC)
 CPPFLAGS =
-CFLAGS   = -Wall -Os $(CPPFLAGS)
+CFLAGS   = -Wextra -Werror -Wall -Os $(CPPFLAGS)
 LDFLAGS  = -static
