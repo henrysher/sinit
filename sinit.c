@@ -31,7 +31,7 @@ int
 main(void)
 {
 	int sig;
-	int i;
+	size_t i;
 
 	if (getpid() != 1)
 		return EXIT_FAILURE;
