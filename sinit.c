@@ -26,11 +26,12 @@ static struct {
 
 #include "config.h"
 
+static sigset_t set;
+
 int
 main(void)
 {
 	struct signalfd_siginfo si;
-	sigset_t set;
 	int fd;
 	int i;
 	ssize_t n;
@@ -93,6 +94,7 @@ spawn(char *const argv[])
 	if (pid < 0) {
 		weprintf("sinit: fork:");
 	} else if (pid == 0) {
+		sigprocmask(SIG_UNBLOCK, &set, NULL);
 		setsid();
 		setpgid(0, 0);
 		execvp(argv[0], argv);
