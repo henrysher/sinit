@@ -10,17 +10,15 @@
 #include <unistd.h>
 #include "util.h"
 
-typedef struct {
-	int sig;
-	void (*func)(void);
-} Sigmap;
-
 static void sigpoweroff(void);
 static void sigreap(void);
 static void sigreboot(void);
 static void spawn(char *const []);
 
-static Sigmap dispatchsig[] = {
+static struct {
+	int sig;
+	void (*handler)(void);
+} sigmap[] = {
 	{ SIGUSR1, sigpoweroff },
 	{ SIGCHLD, sigreap     },
 	{ SIGINT,  sigreboot   },
@@ -42,8 +40,8 @@ main(void)
 	setsid();
 
 	sigemptyset(&set);
-	for (i = 0; i < LEN(dispatchsig); i++)
-		sigaddset(&set, dispatchsig[i].sig);
+	for (i = 0; i < LEN(sigmap); i++)
+		sigaddset(&set, sigmap[i].sig);
 	sigprocmask(SIG_BLOCK, &set, NULL);
 
 	fd = signalfd(-1, &set, SFD_CLOEXEC);
@@ -58,9 +56,9 @@ main(void)
 			eprintf("sinit: read:");
 		if (n != sizeof(si))
 			continue;
-		for (i = 0; i < LEN(dispatchsig); i++)
-			if (dispatchsig[i].sig == si.ssi_signo)
-				dispatchsig[i].func();
+		for (i = 0; i < LEN(sigmap); i++)
+			if (sigmap[i].sig == si.ssi_signo)
+				sigmap[i].handler();
 	}
 
 	/* not reachable */
