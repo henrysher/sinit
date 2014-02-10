@@ -31,10 +31,8 @@ static sigset_t set;
 int
 main(void)
 {
-	struct signalfd_siginfo si;
-	int fd;
+	int sig;
 	int i;
-	ssize_t n;
 
 	if (getpid() != 1)
 		return EXIT_FAILURE;
@@ -45,20 +43,12 @@ main(void)
 		sigaddset(&set, sigmap[i].sig);
 	sigprocmask(SIG_BLOCK, &set, NULL);
 
-	fd = signalfd(-1, &set, SFD_CLOEXEC);
-	if (fd < 0)
-		eprintf("sinit: signalfd:");
-
 	spawn(rcinitcmd);
 
 	while (1) {
-		n = read(fd, &si, sizeof(si));
-		if (n < 0)
-			eprintf("sinit: read:");
-		if (n != sizeof(si))
-			continue;
+		sigwait(&set, &sig);
 		for (i = 0; i < LEN(sigmap); i++)
-			if (sigmap[i].sig == si.ssi_signo)
+			if (sigmap[i].sig == sig)
 				sigmap[i].handler();
 	}
 
