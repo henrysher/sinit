@@ -1,6 +1,5 @@
 /* See LICENSE file for copyright and license details. */
 
-#include <errno.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -88,6 +87,6 @@ spawn(char *const argv[])
 		setpgid(0, 0);
 		execvp(argv[0], argv);
 		weprintf("sinit: execvp %s:", argv[0]);
-		_exit(errno == ENOENT ? 127 : 126);
+		_exit(EXIT_FAILURE);
 	}
 }
