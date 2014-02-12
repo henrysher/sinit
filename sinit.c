@@ -36,6 +36,8 @@ main(void)
 		return EXIT_FAILURE;
 	setsid();
 
+	chdir("/");
+
 	sigemptyset(&set);
 	for (i = 0; i < LEN(sigmap); i++)
 		sigaddset(&set, sigmap[i].sig);
