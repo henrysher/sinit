@@ -34,7 +34,6 @@ main(void)
 
 	if (getpid() != 1)
 		return EXIT_FAILURE;
-	setsid();
 
 	chdir("/");
 
