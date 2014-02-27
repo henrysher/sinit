@@ -45,6 +45,7 @@ util.a: $(LIB)
 
 install: all
 	@echo installing executable to $(DESTDIR)$(PREFIX)/bin
+	@mkdir -p $(DESTDIR)$(PREFIX)/bin
 	@cp -f $(BIN) $(DESTDIR)$(PREFIX)/bin
 	@cd $(DESTDIR)$(PREFIX)/bin && chmod 755 $(BIN)
 
