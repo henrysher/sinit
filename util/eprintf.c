@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "../util.h"
 
 static void venprintf(int, const char *, va_list);
@@ -29,7 +28,7 @@ enprintf(int status, const char *fmt, ...)
 	va_end(ap);
 }
 
-void
+static void
 venprintf(int status, const char *fmt, va_list ap)
 {
 	vfprintf(stderr, fmt, ap);
