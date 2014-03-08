@@ -6,7 +6,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include "util.h"
+
+#define LEN(x) (sizeof (x) / sizeof *(x))
 
 static void sigpoweroff(void);
 static void sigreap(void);
@@ -81,13 +82,13 @@ spawn(char *const argv[])
 
 	pid = fork();
 	if (pid < 0) {
-		weprintf("sinit: fork:");
+		perror("fork");
 	} else if (pid == 0) {
 		sigprocmask(SIG_UNBLOCK, &set, NULL);
 		setsid();
 		setpgid(0, 0);
 		execvp(argv[0], argv);
-		weprintf("sinit: execvp %s:", argv[0]);
+		perror("execvp");
 		_exit(EXIT_FAILURE);
 	}
 }

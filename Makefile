@@ -3,15 +3,12 @@ include config.mk
 .POSIX:
 .SUFFIXES: .c .o
 
-LIB = \
-	util/eprintf.o
-
 SRC = sinit.c
 
-OBJ = $(SRC:.c=.o) $(LIB)
+OBJ = $(SRC:.c=.o)
 BIN = $(SRC:.c=)
 
-all: options binlib
+all: options bin
 
 options:
 	@echo sinit build options:
@@ -19,12 +16,9 @@ options:
 	@echo "LDFLAGS  = $(LDFLAGS)"
 	@echo "CC       = $(CC)"
 
-binlib: util.a
-	$(MAKE) bin
-
 bin: $(BIN)
 
-$(OBJ): config.h util.h config.mk
+$(OBJ): config.h config.mk
 
 config.h:
 	@echo creating $@ from config.def.h
@@ -32,16 +26,11 @@ config.h:
 
 .o:
 	@echo LD $@
-	@$(LD) -o $@ $< util.a $(LDFLAGS)
+	@$(LD) -o $@ $< $(LDFLAGS)
 
 .c.o:
 	@echo CC $<
 	@$(CC) -c -o $@ $< $(CFLAGS)
-
-util.a: $(LIB)
-	@echo AR $@
-	@$(AR) -r -c $@ $(LIB)
-	@ranlib $@
 
 install: all
 	@echo installing executable to $(DESTDIR)$(PREFIX)/bin
@@ -55,4 +44,4 @@ uninstall:
 
 clean:
 	@echo cleaning
-	@rm -f $(BIN) $(OBJ) $(LIB) util.a
+	@rm -f $(BIN) $(OBJ)
