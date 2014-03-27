@@ -38,9 +38,7 @@ main(void)
 
 	chdir("/");
 
-	sigemptyset(&set);
-	for (i = 0; i < LEN(sigmap); i++)
-		sigaddset(&set, sigmap[i].sig);
+	sigfillset(&set);
 	sigprocmask(SIG_BLOCK, &set, NULL);
 
 	spawn(rcinitcmd);
