@@ -35,21 +35,16 @@ main(void)
 
 	if (getpid() != 1)
 		return EXIT_FAILURE;
-
 	chdir("/");
-
 	sigfillset(&set);
 	sigprocmask(SIG_BLOCK, &set, NULL);
-
 	spawn(rcinitcmd);
-
 	while (1) {
 		sigwait(&set, &sig);
 		for (i = 0; i < LEN(sigmap); i++)
 			if (sigmap[i].sig == sig)
 				sigmap[i].handler();
 	}
-
 	/* not reachable */
 	return EXIT_SUCCESS;
 }
