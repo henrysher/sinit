@@ -79,7 +79,6 @@ spawn(char *const argv[])
 	} else if (pid == 0) {
 		sigprocmask(SIG_UNBLOCK, &set, NULL);
 		setsid();
-		setpgid(0, 0);
 		execvp(argv[0], argv);
 		perror("execvp");
 		_exit(EXIT_FAILURE);
