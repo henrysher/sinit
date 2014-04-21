@@ -41,9 +41,12 @@ main(void)
 	spawn(rcinitcmd);
 	while (1) {
 		sigwait(&set, &sig);
-		for (i = 0; i < LEN(sigmap); i++)
-			if (sigmap[i].sig == sig)
+		for (i = 0; i < LEN(sigmap); i++) {
+			if (sigmap[i].sig == sig) {
 				sigmap[i].handler();
+				break;
+			}
+		}
 	}
 	/* not reachable */
 	return EXIT_SUCCESS;
