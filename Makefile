@@ -32,6 +32,15 @@ config.h:
 	@echo CC $<
 	@$(CC) -c -o $@ $< $(CFLAGS)
 
+dist: clean
+	@echo creating dist tarball
+	@mkdir -p sinit-$(VERSION)
+	@cp LICENSE Makefile README config.def.h config.mk sinit.c \
+		sinit-$(VERSION)
+	@tar -cf sinit-$(VERSION).tar sinit-$(VERSION)
+	@gzip sinit-$(VERSION).tar
+	@rm -rf sinit-$(VERSION)
+
 install: all
 	@echo installing executable to $(DESTDIR)$(PREFIX)/bin
 	@mkdir -p $(DESTDIR)$(PREFIX)/bin
@@ -44,4 +53,4 @@ uninstall:
 
 clean:
 	@echo cleaning
-	@rm -f $(BIN) $(OBJ)
+	@rm -f $(BIN) $(OBJ) sinit-$(VERSION).tar.gz
