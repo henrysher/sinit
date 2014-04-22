@@ -35,7 +35,7 @@ config.h:
 dist: clean
 	@echo creating dist tarball
 	@mkdir -p sinit-$(VERSION)
-	@cp LICENSE Makefile README config.def.h config.mk sinit.c \
+	@cp LICENSE Makefile README config.def.h config.mk sinit.8 sinit.c \
 		sinit-$(VERSION)
 	@tar -cf sinit-$(VERSION).tar sinit-$(VERSION)
 	@gzip sinit-$(VERSION).tar
@@ -45,11 +45,17 @@ install: all
 	@echo installing executable to $(DESTDIR)$(PREFIX)/bin
 	@mkdir -p $(DESTDIR)$(PREFIX)/bin
 	@cp -f $(BIN) $(DESTDIR)$(PREFIX)/bin
-	@cd $(DESTDIR)$(PREFIX)/bin && chmod 755 $(BIN)
+	@chmod 755 $(DESTDIR)$(PREFIX)/bin/$(BIN)
+	@echo installing manual page to $(DESTDIR)$(MANPREFIX)/man8
+	@mkdir -p $(DESTDIR)$(MANPREFIX)/man8
+	@sed "s/VERSION/$(VERSION)/g" < sinit.8 > $(DESTDIR)$(MANPREFIX)/man8/sinit.8
+	@chmod 644 $(DESTDIR)$(MANPREFIX)/man8/sinit.8
 
 uninstall:
 	@echo removing executable from $(DESTDIR)$(PREFIX)/bin
 	@cd $(DESTDIR)$(PREFIX)/bin && rm -f $(BIN)
+	@echo removing manual page from $(DESTDIR)$(MANPREFIX)/man8
+	@rm -f $(DESTDIR)$(MANPREFIX)/man8/sinit.8
 
 clean:
 	@echo cleaning
