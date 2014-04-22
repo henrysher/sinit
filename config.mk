@@ -3,7 +3,7 @@ VERSION = 0.9
 
 # paths
 PREFIX = /usr/local
-MANPREFIX = $(PREFIX)/man
+MANPREFIX = $(PREFIX)/share/man
 
 CC = cc
 LD = $(CC)

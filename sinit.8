@@ -1,0 +1,24 @@
+.TH SINIT 8 sinit-VERSION
+.SH NAME
+sinit \- The suckless init
+.SH DESCRIPTION
+sinit is a simple init.  It is configured by modifying `config.h'
+and recompiling the code.
+.SS Signal handling
+sinit will respond to the following set of signals:
+.IP USR1
+Default action is to initiate the shutdown sequence by
+executing `/bin/rc.shutdown poweroff'.
+.IP INT
+Default action is to initiate the reboot sequence by
+executing `/bin/rc.shutdown reboot'.
+.IP CHLD
+Reap children.
+.SS General considerations
+Calling the aforementioned scripts directly might or might not
+work in your case.  For example if any process in your session
+has stale filesystem references then it is likely your init scripts
+will fail to unmount the filesystem cleanly.  It is recommended to
+signal sinit via a wrapper script.
+.SH SEE ALSO
+killall5(8), getty(8)
