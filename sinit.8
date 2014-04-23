@@ -4,6 +4,10 @@ sinit \- The suckless init
 .SH DESCRIPTION
 sinit is a simple init.  It is configured by modifying `config.h'
 and recompiling the code.
+.SS Init sequence
+sinit will by default execute `/bin/rc.init'.  You can chain
+your init scripts together at that point to allow for single-user
+and multi-user mode.
 .SS Signal handling
 sinit will respond to the following set of signals:
 .IP USR1
