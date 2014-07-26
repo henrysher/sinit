@@ -1,10 +1,10 @@
 /* See LICENSE file for copyright and license details. */
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 #include <unistd.h>
 
 #define LEN(x) (sizeof (x) / sizeof *(x))
