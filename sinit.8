@@ -19,10 +19,12 @@ executing `/bin/rc.shutdown reboot'.
 .IP CHLD
 Reap children.
 .SS General considerations
-Calling the aforementioned scripts directly might or might not
-work in your case.  For example if any process in your session
-has stale filesystem references then it is likely your init scripts
-will fail to unmount the filesystem cleanly.  It is recommended to
-signal sinit via a wrapper script.
+Running the rc.shutdown script directly is not recommended.  If any
+process in your session has stale filesystem references then it is
+likely your init scripts will fail to unmount the filesystem cleanly.
+It is recommended to signal sinit via a wrapper script.
+Similarly, sinit does not clear utmp records.  The version of getty(8)
+in ubase clears the utmp entries on the specified tty before it
+spawns the given program, usually login(1).
 .SH SEE ALSO
 killall5(8), getty(8)
