@@ -34,7 +34,7 @@ main(void)
 	size_t i;
 
 	if (getpid() != 1)
-		return EXIT_FAILURE;
+		return 1;
 	chdir("/");
 	sigfillset(&set);
 	sigprocmask(SIG_BLOCK, &set, NULL);
@@ -49,7 +49,7 @@ main(void)
 		}
 	}
 	/* not reachable */
-	return EXIT_SUCCESS;
+	return 0;
 }
 
 static void
@@ -84,6 +84,6 @@ spawn(char *const argv[])
 		setsid();
 		execvp(argv[0], argv);
 		perror("execvp");
-		_exit(EXIT_FAILURE);
+		_exit(1);
 	}
 }
