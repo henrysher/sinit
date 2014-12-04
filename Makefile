@@ -8,7 +8,7 @@ all: $(BIN)
 $(BIN): $(OBJ)
 	$(CC) $(LDFLAGS) -o $@ $(OBJ) $(LDLIBS)
 
-sinit.o: config.h
+$(OBJ): config.h
 
 install: all
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
