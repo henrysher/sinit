@@ -9,18 +9,18 @@
 
 #define LEN(x) (sizeof (x) / sizeof *(x))
 
-static void sigpoweroff(void);
-static void sigreap(void);
-static void sigreboot(void);
+static void poweroff(void);
+static void reap(void);
+static void reboot(void);
 static void spawn(char *const []);
 
 static struct {
 	int sig;
 	void (*handler)(void);
 } sigmap[] = {
-	{ SIGUSR1, sigpoweroff },
-	{ SIGCHLD, sigreap     },
-	{ SIGINT,  sigreboot   },
+	{ SIGUSR1, poweroff },
+	{ SIGCHLD, reap     },
+	{ SIGINT,  reboot   },
 };
 
 #include "config.h"
@@ -53,20 +53,20 @@ main(void)
 }
 
 static void
-sigpoweroff(void)
+poweroff(void)
 {
 	spawn(rcpoweroffcmd);
 }
 
 static void
-sigreap(void)
+reap(void)
 {
 	while (waitpid(-1, NULL, WNOHANG) > 0)
 		;
 }
 
 static void
-sigreboot(void)
+reboot(void)
 {
 	spawn(rcrebootcmd);
 }
