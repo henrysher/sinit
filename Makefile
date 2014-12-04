@@ -1,62 +1,39 @@
 include config.mk
 
-.POSIX:
-.SUFFIXES: .c .o
+OBJ = sinit.o
+BIN = sinit
 
-SRC = sinit.c
+all: $(BIN)
 
-OBJ = $(SRC:.c=.o)
-BIN = $(SRC:.c=)
+$(BIN): $(OBJ)
+	$(CC) $(LDFLAGS) -o $@ $(OBJ) $(LDLIBS)
 
-all: options bin
-
-options:
-	@echo sinit build options:
-	@echo "CFLAGS   = $(CFLAGS)"
-	@echo "LDFLAGS  = $(LDFLAGS)"
-	@echo "CC       = $(CC)"
-
-bin: $(BIN)
-
-$(OBJ): config.h config.mk
-
-config.h:
-	@echo creating $@ from config.def.h
-	@cp config.def.h $@
-
-.o:
-	@echo LD $@
-	@$(LD) -o $@ $< $(LDFLAGS)
-
-.c.o:
-	@echo CC $<
-	@$(CC) -c -o $@ $< $(CFLAGS)
-
-dist: clean
-	@echo creating dist tarball
-	@mkdir -p sinit-$(VERSION)
-	@cp LICENSE Makefile README config.def.h config.mk sinit.8 sinit.c \
-		sinit-$(VERSION)
-	@tar -cf sinit-$(VERSION).tar sinit-$(VERSION)
-	@gzip sinit-$(VERSION).tar
-	@rm -rf sinit-$(VERSION)
+sinit.o: config.h
 
 install: all
-	@echo installing executable to $(DESTDIR)$(PREFIX)/bin
-	@mkdir -p $(DESTDIR)$(PREFIX)/bin
-	@cp -f $(BIN) $(DESTDIR)$(PREFIX)/bin
-	@chmod 755 $(DESTDIR)$(PREFIX)/bin/$(BIN)
-	@echo installing manual page to $(DESTDIR)$(MANPREFIX)/man8
-	@mkdir -p $(DESTDIR)$(MANPREFIX)/man8
-	@sed "s/VERSION/$(VERSION)/g" < sinit.8 > $(DESTDIR)$(MANPREFIX)/man8/sinit.8
-	@chmod 644 $(DESTDIR)$(MANPREFIX)/man8/sinit.8
+	mkdir -p $(DESTDIR)$(PREFIX)/bin
+	cp -f $(BIN) $(DESTDIR)$(PREFIX)/bin
+	mkdir -p $(DESTDIR)$(MANPREFIX)/man8
+	sed "s/VERSION/$(VERSION)/g" < $(BIN).8 > $(DESTDIR)$(MANPREFIX)/man8/$(BIN).8
 
 uninstall:
-	@echo removing executable from $(DESTDIR)$(PREFIX)/bin
-	@cd $(DESTDIR)$(PREFIX)/bin && rm -f $(BIN)
-	@echo removing manual page from $(DESTDIR)$(MANPREFIX)/man8
-	@rm -f $(DESTDIR)$(MANPREFIX)/man8/sinit.8
+	rm -f $(DESTDIR)$(PREFIX)/bin/$(BIN)
+	rm -f $(DESTDIR)$(MANPREFIX)/man8/$(BIN).8
+
+dist: clean
+	mkdir -p sinit-$(VERSION)
+	cp LICENSE Makefile README config.def.h config.mk sinit.8 sinit.c sinit-$(VERSION)
+	tar -cf sinit-$(VERSION).tar sinit-$(VERSION)
+	gzip sinit-$(VERSION).tar
+	rm -rf sinit-$(VERSION)
 
 clean:
-	@echo cleaning
-	@rm -f $(BIN) $(OBJ) sinit-$(VERSION).tar.gz
+	rm -f $(BIN) $(OBJ) sinit-$(VERSION).tar.gz
+
+.SUFFIXES: .def.h
+
+.def.h.h:
+	cp $< $@
+
+.PHONY:
+	all install uninstall dist clean
